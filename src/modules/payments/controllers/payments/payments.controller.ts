@@ -9,7 +9,6 @@ export class PaymentsController {
 
     @Post()
     public sendMoney(@Body() requestDTO: any) {
-        this.paymentService.sendMoney();
-        return 'This is sending money';
+        return this.paymentService.sendMoney();
     }
 }
