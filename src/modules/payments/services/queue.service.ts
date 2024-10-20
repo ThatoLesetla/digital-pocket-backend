@@ -6,14 +6,14 @@ export class QueueService {
     private readonly logger = new Logger(QueueService.name);
     private readonly sqs = new AWS.SQS({
         region: 'us-east-1', // Replace with your region
-        accessKeyId: process.env.accessKeyId, // Replace with your AWS access key
-        secretAccessKey: process.env.secretAccessKey, // Replace with your AWS secret key
+        accessKeyId: process.env.ACCESS_KEY_ID, // Replace with your AWS access key
+        secretAccessKey: process.env.SECRET_ACCESS_KEY, // Replace with your AWS secret key
     });
-    private readonly queueUrl = 'your-queue-url'; // Replace with your SQS Queue URL
+    private readonly queueUrl = 'https://sqs.us-east-1.amazonaws.com/945647145575/Sabi-payments'; // Replace with your SQS Queue URL
 
   onModuleInit() {
-    // Start polling the queue every 2 seconds
-    // setInterval(() => this.pollQueue(), 5000);
+    // Start polling the payment queue every 5 seconds
+    setInterval(() => this.pollQueue(), 5000);
   }
 
   private async pollQueue(): Promise<void> {

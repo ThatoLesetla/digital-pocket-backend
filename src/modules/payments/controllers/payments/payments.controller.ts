@@ -5,8 +5,7 @@ import { QueueService } from '../../services/queue.service';
 @Controller('payments')
 export class PaymentsController {
     constructor(
-        public paymentService: PaymentService,
-        public queueService: QueueService
+        public paymentService: PaymentService
     ) {
 
     }
@@ -16,8 +15,9 @@ export class PaymentsController {
         return this.paymentService.sendMoney();
     }
 
-    @Post('queue/start')
-    public startQueue() {
-        this.queueService.onModuleInit();
+    @Post('transaction/finalization')
+    public finalizePayment(@Body() paymentDTO: any) {
+        console.log(paymentDTO);
     }
+
 }
