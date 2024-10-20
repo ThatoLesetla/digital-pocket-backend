@@ -5,15 +5,15 @@ import * as AWS from 'aws-sdk';
 export class QueueService {
     private readonly logger = new Logger(QueueService.name);
     private readonly sqs = new AWS.SQS({
-        region: 'your-region', // Replace with your region
-        accessKeyId: 'your-access-key', // Replace with your AWS access key
-        secretAccessKey: 'your-secret-key', // Replace with your AWS secret key
+        region: 'us-east-1', // Replace with your region
+        accessKeyId: process.env.accessKeyId, // Replace with your AWS access key
+        secretAccessKey: process.env.secretAccessKey, // Replace with your AWS secret key
     });
     private readonly queueUrl = 'your-queue-url'; // Replace with your SQS Queue URL
 
   onModuleInit() {
     // Start polling the queue every 2 seconds
-    setInterval(() => this.pollQueue(), 5000);
+    // setInterval(() => this.pollQueue(), 5000);
   }
 
   private async pollQueue(): Promise<void> {
