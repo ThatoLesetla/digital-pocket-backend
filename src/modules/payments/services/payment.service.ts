@@ -36,8 +36,8 @@ export class PaymentService {
           let quote = await this.createQuote(client, quoteGrant.access_token.value, incomingPayment.id);
           let outgoingPaymentGrant = await this.requestOutgoingPaymentGrant(client, walletAddress, quote.debitAmount.value, quote.receiveAmount.value);
 
-          await this.redisService.set('outgoingPaymentGrant', outgoingPaymentGrant);
-          await this.redisService.set('quote', quote);
+          fs.writeFileSync("src/wallets/quote.txt", JSON.stringify(quote), "utf-8"); 
+          fs.writeFileSync("src/wallets/outgoingPaymentsGrant.txt", JSON.stringify(outgoingPaymentGrant), "utf-8");
 
           return outgoingPaymentGrant;
 
@@ -164,38 +164,35 @@ export class PaymentService {
     }
 
     async finalizePayment(hash: any, interactRef: any) {
-      let outgoingPaymentGrant = await this.redisService.get('outgoingPaymentGrant');
-      let quote = await this.redisService.get('quote');
-
-      const client = await createAuthenticatedClient({
-        keyId: "08e6819c-3ce8-48d0-8fdb-3bbe01cad963",
-        privateKey: PRIVATE_KEY,
-        walletAddressUrl: WALLET_ADDRESS
-      })
-
-      // Get the wallet address
-      const walletAddress = await client.walletAddress.get({
-        url: WALLET_ADDRESS,
-      });
-
-      const finalizedOutgoingPaymentGrant = await client.grant.continue({
-        url: "https://auth.interledger-test.dev/continue/6b44d5d1-2d00-44c8-81a2-9cfac011d064",
-        accessToken: "39D0FE573C5E02D0FEC4",
-      });
-
-      let isGrant = isFinalizedGrant(finalizedOutgoingPaymentGrant);
-      // let outgoingPayment = await this.createOutgoingPayment(client, finalizedOutgoingPaymentGrant.continue.access_token.value, walletAddress, quote.id);
-
-    }
-
-    writeObjectToFile(filename: string, data: any): void {
-      // Create the file path (adjust the directory as needed)
-      const filePath = join(__dirname, '..', '..', 'data', filename);
+      try {
+        const client = await createAuthenticatedClient({
+          keyId: "08e6819c-3ce8-48d0-8fdb-3bbe01cad963",
+          privateKey: PRIVATE_KEY,
+          walletAddressUrl: WALLET_ADDRESS
+        })
   
-      // Convert the object to JSON string
-      const jsonData = JSON.stringify(data, null, 2); // Pretty print with 2 spaces
+        // Get the wallet address
+        const walletAddress = await client.walletAddress.get({
+          url: WALLET_ADDRESS,
+        });
   
-      // Write the JSON string to the file
-      fs.writeFileSync(filePath, jsonData, 'utf-8');
+        let quote = JSON.parse(fs.readFileSync("src/wallets/quote.txt", "utf-8"));
+        let outgoingPaymentGrant = JSON.parse(fs.readFileSync("src/wallets/outgoingPaymentsGrant.txt", "utf-8"))
+  
+        const finalizedOutgoingPaymentGrant = await client.grant.continue({
+          url: outgoingPaymentGrant.contineu.uri,
+          accessToken: outgoingPaymentGrant.continue.access_token.value,
+        });
+  
+        let isGrant = isFinalizedGrant(finalizedOutgoingPaymentGrant);
+        let outgoingPayment = await this.createOutgoingPayment(client, finalizedOutgoingPaymentGrant.continue.access_token.value, walletAddress, quote.id);  
+      } catch (error) {
+        throw new HttpException({
+          status: HttpStatus.FORBIDDEN,
+          error: 'This is a custom message',
+        }, HttpStatus.FORBIDDEN, {
+            cause: error
+        });
+      }
     }
 }
